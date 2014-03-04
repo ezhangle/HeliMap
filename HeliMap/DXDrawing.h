@@ -61,16 +61,16 @@ int DirectXInit(HWND hWnd)
 }
 
 typedef struct _D3DTLVERTEX{
-	FLOAT fX;
-	FLOAT fY;
-	FLOAT fZ;
-	FLOAT fRHW;
+	double fX;
+	double fY;
+	double fZ;
+	double fRHW;
 	D3DCOLOR Color;
-	FLOAT fU;
-	FLOAT fV;
+	double fU;
+	double fV;
 }D3DTLVERTEX,*PD3DTLVERTEX;
 
-void FillRGB(float x, float y, float w, float h, int r, int g, int b, int a) 
+void FillRGB(double x, double y, double w, double h, int r, int g, int b, int a) 
 { 
 	D3DXVECTOR2 vLine[2]; 
 
@@ -111,7 +111,7 @@ int DrawShadowString(const char* String, int x, int y, int r, int g, int b, ID3D
 	return 0;
 }
 
-VOID WINAPI BuildVertex( FLOAT X, FLOAT Y, DWORD COLOR, PD3DTLVERTEX PD3DTLV, UINT Index )
+VOID WINAPI BuildVertex( double X, double Y, DWORD COLOR, PD3DTLVERTEX PD3DTLV, UINT Index )
 {
 	PD3DTLV[Index].fX			= X;
 	PD3DTLV[Index].fY				= Y;
@@ -122,7 +122,7 @@ VOID WINAPI BuildVertex( FLOAT X, FLOAT Y, DWORD COLOR, PD3DTLVERTEX PD3DTLV, UI
 	PD3DTLV[Index].Color		= COLOR;
 }
 
-BOOL WINAPI D3DDrawLine( FLOAT X1, FLOAT Y1, FLOAT X2, FLOAT Y2, DWORD COLOR, LPDIRECT3DDEVICE9 pDev )
+BOOL WINAPI D3DDrawLine( double X1, double Y1, double X2, double Y2, DWORD COLOR, LPDIRECT3DDEVICE9 pDev )
 {
 	D3DTLVERTEX D3DTLV[20];
 
@@ -136,7 +136,7 @@ BOOL WINAPI D3DDrawLine( FLOAT X1, FLOAT Y1, FLOAT X2, FLOAT Y2, DWORD COLOR, LP
 	return TRUE;
 }
 
-BOOL WINAPI D3DDrawFillRect( FLOAT X, FLOAT Y, DWORD COLOR, UINT Width, UINT Height, LPDIRECT3DDEVICE9 pDev)
+BOOL WINAPI D3DDrawFillRect( double X, double Y, DWORD COLOR, UINT Width, UINT Height, LPDIRECT3DDEVICE9 pDev)
 {
 	D3DTLVERTEX D3DTLV[20];
 
@@ -155,19 +155,19 @@ BOOL WINAPI D3DDrawFillRect( FLOAT X, FLOAT Y, DWORD COLOR, UINT Width, UINT Hei
 	return TRUE;
 }
 
-BOOL WINAPI D3DDrawFillCircle( FLOAT X, FLOAT Y, DWORD COLOR,LPDIRECT3DDEVICE9 pDev, FLOAT Radius)
+BOOL WINAPI D3DDrawFillCircle( double X, double Y, DWORD COLOR,LPDIRECT3DDEVICE9 pDev, double Radius)
 {
 	D3DTLVERTEX D3DTLV[400];
 
-	FLOAT X1	= X;
-	FLOAT Y1	= Y;
+	double X1	= X;
+	double Y1	= Y;
 
 	for( int i=0;i<=363;i+=3 )
 	{
-		FLOAT angle		= ( i / 57.3f );   
+		double angle		= ( i / 57.3f );   
 
-		FLOAT X2		= X + ( Radius * sin( angle ) );
-		FLOAT Y2		= Y + ( Radius * cos( angle ) );        
+		double X2		= X + ( Radius * sin( angle ) );
+		double Y2		= Y + ( Radius * cos( angle ) );        
 
 		BuildVertex( X, Y, COLOR, PD3DTLVERTEX(&D3DTLV), i );
 		BuildVertex( X1, Y1, COLOR, PD3DTLVERTEX(&D3DTLV), i + 1 );
@@ -184,12 +184,12 @@ BOOL WINAPI D3DDrawFillCircle( FLOAT X, FLOAT Y, DWORD COLOR,LPDIRECT3DDEVICE9 p
 	return TRUE;
 }
 
-BOOL WINAPI D3DDrawLineCircle( const D3DXVECTOR2 &Center,float Radius,DWORD color,unsigned short Sides /*= 30*/,LPDIRECT3DDEVICE9 pDev )
+BOOL WINAPI D3DDrawLineCircle( const D3DXVECTOR2 &Center,double Radius,DWORD color,unsigned short Sides /*= 30*/,LPDIRECT3DDEVICE9 pDev )
 {
-	float Angle = (360.0f/Sides)*(3.1415926f/180); //to radians
+	double Angle = (360.0f/Sides)*(3.1415926f/180); //to radians
 
-	float Cos = cos(Angle);
-	float Sin = sin(Angle);
+	double Cos = cos(Angle);
+	double Sin = sin(Angle);
 
 	D3DXVECTOR2 vec(Radius,0);
 
@@ -205,7 +205,7 @@ BOOL WINAPI D3DDrawLineCircle( const D3DXVECTOR2 &Center,float Radius,DWORD colo
 	return TRUE;
 }
 
-D3DXVECTOR3 GetCirclePoint( D3DXVECTOR3 center, float radius, int index, int vertexCount )
+D3DXVECTOR3 GetCirclePoint( D3DXVECTOR3 center, double radius, int index, int vertexCount )
 {
 	D3DXVECTOR3 point = center;
 	point.x += sin( index * ( 2.0f * D3DX_PI ) / vertexCount ) * radius;

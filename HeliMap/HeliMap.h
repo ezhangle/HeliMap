@@ -20,6 +20,7 @@
 #include <fcntl.h>
 #include <io.h>
 #include <limits>
+#include <iomanip>
 
 #pragma comment(lib, "d3d9.lib")
 #pragma comment(lib, "d3dx9.lib")

@@ -5,9 +5,9 @@ const double eccent_e = 0.081819191310869760;
 
 struct Coordinate
 {
-	float lat;
-	float lon;
-	Coordinate(float l,float ln)
+	double lat;
+	double lon;
+	Coordinate(double l,double ln)
 	{
 		lat=l;
 		lon=ln;
@@ -29,7 +29,7 @@ struct Coordinate
 	}
 	void ToScreen()
 	{
-		printf("Lat:%.8f Lon:%.8f\n",lat,lon);
+		printf("Lat:%f Lon:%f\n",lat,lon);
 	}
 };
 struct Point

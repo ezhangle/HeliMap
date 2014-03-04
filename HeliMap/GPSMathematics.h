@@ -27,6 +27,10 @@ struct Coordinate
 		lat*=180/M_PI;
 		lon*=180/M_PI;
 	}
+	void ToScreen()
+	{
+		printf("Lat:%.8f Lon:%.8f\n",lat,lon);
+	}
 };
 struct Point
 {

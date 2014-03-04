@@ -20,6 +20,8 @@ LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 
 void GetGPSImage();
+void SaveXML(const char* path);
+void ReadXML(const char* path);
 ObjectsToDraw* objects;
 VOID CreateConsole( )
 {
@@ -80,14 +82,11 @@ int Render()
 	float x=(float) cos(degrees*(M_PI/180))*distance*3280.84f;
 	float y=(float) sin(degrees*(M_PI/180))*distance*3280.84f;
 
-	
-
 	D3DDrawLine(Heli.x,Heli.y,Obst1Screen.x,Heli.y,D3DCOLOR_RGBA(255,0,0,255),p_Device);
 	D3DDrawLine(Obst1Screen.x,Heli.y,Obst1Screen.x,Obst1Screen.y,D3DCOLOR_RGBA(255,0,0,255),p_Device);
 
 	DrawTextFormat(Heli.x+((Obst1Screen.x-Heli.x)/2),Heli.y-5,D3DCOLOR_RGBA(0,0,255,255),CText,"%.1f",abs(x));
 	DrawTextFormat(Obst1Screen.x,Heli.y+((Obst1Screen.y-Heli.y)/2),D3DCOLOR_RGBA(0,0,255,255),CText,"%.1f",abs(y));
-	
 	
 	p_Device->EndScene();
 	p_Device->PresentEx(0, 0, 0, 0, 0);
@@ -110,6 +109,10 @@ void Initialize()
 	obstacles.push_back(Obst4);
 
 	objects=new ObjectsToDraw(obstacles,Helicoord);
+	String path=GetExePath();
+	path.append("\\Locations.xml");
+
+	ReadXML(path.c_str());
 }
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,_In_opt_ HINSTANCE hPrevInstance,_In_ LPTSTR lpCmdLine,_In_ int nCmdShow)
 {
@@ -155,6 +158,86 @@ void GetGPSImage()
 	sprintf_s(buffer,"http://maps.googleapis.com/maps/api/staticmap?center=%f,%f&zoom=%d&size=%dx%d&sensor=false",40.300281,-79.75767,21,clientwidth,clientheight);
 
 }
+
+String GetHigherPrecision(float value)
+{
+	std::ostringstream oss;
+	oss.precision(8);
+	oss <<value;
+	return oss.str();
+}
+void SaveXML(const char* path)
+{
+	TiXmlDocument doc;  
+	TiXmlDeclaration* decl = new TiXmlDeclaration( "1.0", "", "" );  
+	doc.LinkEndChild( decl );  
+
+	TiXmlElement * root = new TiXmlElement( "ReClass" );  
+	doc.LinkEndChild( root );  
+
+	TiXmlComment * comment = new TiXmlComment();
+	comment->SetValue("Helicopter Map 2014" );  
+	root->LinkEndChild( comment );  
+
+	
+
+	TiXmlElement* classnode = new TiXmlElement("Helicopter");
+	classnode->SetAttribute("Latitude",GetHigherPrecision(40.300281).c_str());
+	classnode->SetAttribute("Longitude",GetHigherPrecision(-79.757678).c_str());
+	root->LinkEndChild(classnode);
+	
+	TiXmlElement* classnode2 = new TiXmlElement("Obstacle");
+	classnode2->SetAttribute("Latitude",GetHigherPrecision(40.300289).c_str());
+	classnode2->SetAttribute("Longitude",GetHigherPrecision(-79.757561).c_str());
+	root->LinkEndChild(classnode2);
+
+	TiXmlElement* classnode3 = new TiXmlElement("Obstacle");
+	classnode3->SetAttribute("Latitude",GetHigherPrecision(40.300417).c_str());
+	classnode3->SetAttribute("Longitude",GetHigherPrecision(-79.757502).c_str());
+	root->LinkEndChild(classnode3);
+
+	TiXmlElement* classnode4 = new TiXmlElement("Obstacle");
+	classnode4->SetAttribute("Latitude",GetHigherPrecision(40.300528).c_str());
+	classnode4->SetAttribute("Longitude",GetHigherPrecision(-79.757657).c_str());
+	root->LinkEndChild(classnode4);
+
+	TiXmlElement* classnode5 = new TiXmlElement("Obstacle");
+	classnode5->SetAttribute("Latitude",GetHigherPrecision(40.300397).c_str());
+	classnode5->SetAttribute("Longitude",GetHigherPrecision(-79.757827).c_str());
+	root->LinkEndChild(classnode5);
+
+	doc.SaveFile(path);
+}
+void ReadXML(const char* path)
+{
+	TiXmlDocument doc(path);
+	doc.LoadFile();
+
+	TiXmlHandle hDoc(&doc);
+	TiXmlHandle hRoot(0);
+	TiXmlElement* pElem;
+	
+	pElem=hDoc.FirstChildElement().Element();
+	hRoot=TiXmlHandle(pElem);
+
+	pElem=hRoot.FirstChild( "Helicopter" ).Element();
+	Coordinate heli=Coordinate(atof(pElem->Attribute("Latitude")),atof(pElem->Attribute("Longitude")));
+	
+	std::vector<Coordinate> Obstacles;
+	pElem=hRoot.FirstChild("Obstacle").Element();
+	
+	while(pElem)
+	{
+		Coordinate Obstacle=Coordinate(atof(pElem->Attribute("Latitude")),atof(pElem->Attribute("Longitude")));
+		Obstacles.push_back(Obstacle);
+		pElem=pElem->NextSiblingElement("Obstacle");
+	}
+	heli.ToScreen();
+	for (int i=0;i<Obstacles.size();i++)
+	{
+		Obstacles.at(i).ToScreen();
+	}
+}
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
 	WNDCLASSEX wcex;
@@ -194,7 +277,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
    
-   //CreateConsole();
+   CreateConsole();
    return TRUE;
 }
 

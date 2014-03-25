@@ -7,6 +7,7 @@ ID3DXSprite* pSprite;
 IDirect3DTexture9* pBackGroundTexture;
 IDirect3DTexture9* pHelicopterTexture;
 IDirect3DTexture9* pObstacleTexture;
+IDirect3DTexture9* pDropTexture;
 
 const MARGINS Margin = { 0, 0, 800, 600 };
 #define CText (DT_CENTER|DT_NOCLIP)
@@ -53,10 +54,13 @@ int DirectXInit(HWND hWnd)
 	String obstalce=path;
 	obstalce.append("\\obstacle.png");
 
+	String target=path;
+	target.append("\\target.png");
+
 	D3DXCreateTextureFromFileA(p_Device,background.c_str(),&pBackGroundTexture);
 	D3DXCreateTextureFromFileA(p_Device,heli.c_str(),&pHelicopterTexture);
 	D3DXCreateTextureFromFileA(p_Device,obstalce.c_str(),&pObstacleTexture);
-
+	D3DXCreateTextureFromFileA(p_Device,target.c_str(),&pDropTexture);
 	return 0;
 }
 

@@ -6,6 +6,7 @@
 #include "GPSMathematics.h"
 #include "DXDrawing.h"
 
+
 #define MAX_LOADSTRING 100
 bool painting=false;
 // Global Variables:
@@ -20,8 +21,7 @@ LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 
 void GetGPSImage();
-void SaveXML(const char* path);
-void ReadXML(const char* path);
+
 ObjectsToDraw* objects;
 VOID CreateConsole( )
 {
@@ -72,6 +72,17 @@ int Render()
 		DrawTextFormat(ObstaclePoint.x,ObstaclePoint.y+15,D3DCOLOR_RGBA(0,0,255,255),CText,"Obstacle %d",i+1);
 	}
 
+	for (int i = 0; i < objects->GetDropScreenSize(); i++)
+	{
+		Point DropPoint=objects->GetDropScreenAt(i);
+
+		pSprite->Begin(D3DXSPRITE_ALPHABLEND); 
+		pSprite->Draw(pDropTexture, 0,&D3DXVECTOR3(12.5,12.5,0), &D3DXVECTOR3(DropPoint.x,DropPoint.y,0),0xFFFFFFFF );
+		pSprite->Flush();
+		pSprite->End();	
+		DrawTextFormat(DropPoint.x,DropPoint.y+20,D3DCOLOR_RGBA(255,0,0,255),CText,"Drop %d",i+1);
+	}
+
 	Coordinate HeliGPS=objects->GetHeli();
 	Coordinate Obst1=objects->GetObstalceAt(1);
 	Point Obst1Screen=objects->GetObstacleScreenAt(1);
@@ -96,23 +107,39 @@ int Render()
 
 void Initialize()
 {
-	Coordinate Helicoord=Coordinate(40.300281,-79.757678);
-	Coordinate Obst1=Coordinate(40.300289,-79.757561);
-	Coordinate Obst2=Coordinate(40.300417,-79.757502);
-	Coordinate Obst3=Coordinate(40.300528,-79.757657);
-	Coordinate Obst4=Coordinate(40.300397,-79.757827);
+	Coordinate Helicoord=Coordinate(40.828223,-79.914226);
+
+	Coordinate Gate1A=Coordinate(40.828223,-79.914226);
+	Coordinate Gate1B=Coordinate(40.828376,-79.914217);
+	Coordinate Gate2A=Coordinate(40.828189,-79.914397);
+	Coordinate Gate2B=Coordinate(40.828189,-79.914621);
+	Coordinate Gate3A= Coordinate(40.828246,-79.914888);
+	Coordinate Gate3B=Coordinate(40.828244, -79.915044);
+	Coordinate Gate4A=Coordinate(40.828478,-79.914754);
+	Coordinate Gate4B=Coordinate(40.828536 ,-79.914618);
+
+	Coordinate Drop1=Coordinate(40.828281,-79.914337);
+	Coordinate Drop2=Coordinate(40.828010,-79.914470);
+	Coordinate Drop3=Coordinate(40.828303,-79.915040);
+	Coordinate Drop4=Coordinate(40.828431,-79.914580);
 
 	std::vector<Coordinate>obstacles;
-	obstacles.push_back(Obst1);
-	obstacles.push_back(Obst2);
-	obstacles.push_back(Obst3);
-	obstacles.push_back(Obst4);
+	obstacles.push_back(Gate1A);
+	obstacles.push_back(Gate1B);
+	obstacles.push_back(Gate2A);
+	obstacles.push_back(Gate2B);
+	obstacles.push_back(Gate3A);
+	obstacles.push_back(Gate3B);
+	obstacles.push_back(Gate4A);
+	obstacles.push_back(Gate4B);
 
-	objects=new ObjectsToDraw(obstacles,Helicoord);
-	String path=GetExePath();
-	path.append("\\Locations.xml");
+	std::vector<Coordinate> Drops;
+	Drops.push_back(Drop1);
+	Drops.push_back(Drop2);
+	Drops.push_back(Drop3);
+	Drops.push_back(Drop4);
 
-	ReadXML(path.c_str());
+	objects=new ObjectsToDraw(obstacles,Drops,Helicoord);
 }
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,_In_opt_ HINSTANCE hPrevInstance,_In_ LPTSTR lpCmdLine,_In_ int nCmdShow)
 {

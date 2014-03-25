@@ -153,17 +153,21 @@ float Re_Range(float x,float inmin,float inmax,float outmin,float outmax)
 	return newval;
 }
 
+
  class ObjectsToDraw
 {
 	std::vector<Coordinate> ObstacleCoords;
 	std::vector<Point> ObstacleScreenPoints;
+	std::vector<Point> DropScreenPoints;
+	std::vector<Coordinate> DropPoints;
 	Coordinate HeliCoord;
 	Point HeliScreenPoint;
 	float minx,miny,maxx, maxy;
 public:
-	ObjectsToDraw(std::vector<Coordinate> Obstacles,Coordinate Heli)
+	ObjectsToDraw(std::vector<Coordinate> Obstacles,std::vector<Coordinate> Drops,Coordinate Heli)
 	{
 		ObstacleCoords=Obstacles;
+		DropPoints=Drops;
 		HeliCoord=Heli;
 		minx=99999999999999999.0f;
 		miny=99999999999999999.0f;
@@ -173,48 +177,49 @@ public:
 
 	void CalculateScreens()
 	{
+		//we need to clear arrays so we don't have duplicates
 		ObstacleScreenPoints.clear();
-		HeliScreenPoint=Point(0,0);
+		DropScreenPoints.clear();
+		
+		//now we iterate all entities to be drawn, and find their extremes so we can zoom in
 		for(int i=0;i<ObstacleCoords.size();i++)
 		{
 			Point screen=GetProjection(ObstacleCoords.at(i)); //get mercator projection
 			//find min and max values for re-ranging, this is effectively zooming to fit our objects
-			if(screen.x<minx)
-				minx=screen.x;
-
-			if(screen.x>maxx)
-				maxx=screen.x;
-
-			if(screen.y<miny)
-				miny=screen.y;
-
-			if(screen.y>maxy)
-				maxy=screen.y;
+			CalcZoom(screen);
 			ObstacleScreenPoints.push_back(screen);
 		}
 		//same thing as obstacles but do it for heli now
+		HeliScreenPoint=Point(0,0);
 		HeliScreenPoint=GetProjection(HeliCoord);
-		if(HeliScreenPoint.x<minx)
-			minx=HeliScreenPoint.x;
+		CalcZoom(HeliScreenPoint);
 
-		if(HeliScreenPoint.x>maxx)
-			maxx=HeliScreenPoint.x;
-
-		if(HeliScreenPoint.y<miny)
-			miny=HeliScreenPoint.y;
-
-		if(HeliScreenPoint.y>maxy)
-			maxy=HeliScreenPoint.y;
+		for(int i=0;i<DropPoints.size();i++)
+		{
+			Point screen=GetProjection(DropPoints.at(i));
+			CalcZoom(screen);
+			DropScreenPoints.push_back(screen);
+		}
 
 		float x=Re_Range(HeliScreenPoint.x,minx,maxx,100,clientwidth-100); //re-range our x,y values, add 100 to keep a nice border
 		float y=Re_Range(HeliScreenPoint.y,miny,maxy,100,clientheight-100);
-		HeliScreenPoint=Point(x,y);
+		HeliScreenPoint=Point(x,y); 
+
+		//now re-range our obstacles points
 		for(int i=0;i<ObstacleScreenPoints.size();i++)
 		{
 			Point pnt=ObstacleScreenPoints.at(i);
 			float x=Re_Range(pnt.x,minx,maxx,100,clientwidth-100);
 			float y=Re_Range(pnt.y,miny,maxy,100,clientheight-100);
 			ObstacleScreenPoints.at(i)=Point(x,y);
+		}
+
+		for(int i=0;i<DropScreenPoints.size();i++)
+		{
+			Point pnt=DropScreenPoints.at(i);
+			float x=Re_Range(pnt.x,minx,maxx,100,clientwidth-100);
+			float y=Re_Range(pnt.y,miny,maxy,100,clientheight-100);
+			DropScreenPoints.at(i)=Point(x,y);
 		}
 	}
 	Coordinate GetObstalceAt(int index)
@@ -231,6 +236,20 @@ public:
 
 		return ObstacleScreenPoints.at(index);
 	}
+	Coordinate GetDropat(int index)
+	{
+		if(index>DropPoints.size())
+			return Coordinate();
+
+		return DropPoints.at(index);
+	}
+	Point GetDropScreenAt(int index)
+	{
+		if(index>DropScreenPoints.size())
+			return Point();
+
+		return DropScreenPoints.at(index);
+	}
 	int GetObstacleScreenSize()
 	{
 		return ObstacleScreenPoints.size();
@@ -238,6 +257,14 @@ public:
 	int GetObstacleSize()
 	{
 		return ObstacleCoords.size();
+	}
+	int GetDropPointSize()
+	{
+		return DropPoints.size();
+	}
+	int GetDropScreenSize()
+	{
+		return DropScreenPoints.size();
 	}
 	Coordinate GetHeli()
 	{
@@ -263,5 +290,19 @@ public:
 	~ObjectsToDraw()
 	{
 		
+	}
+	void CalcZoom(Point screen)
+	{
+		if(screen.x<minx)
+			minx=screen.x;
+
+		if(screen.x>maxx)
+			maxx=screen.x;
+
+		if(screen.y<miny)
+			miny=screen.y;
+
+		if(screen.y>maxy)
+			maxy=screen.y;
 	}
 };
